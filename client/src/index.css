@@ -336,3 +336,9 @@ body {
 input, button, select, textarea {
   font-family: inherit;
 }
+
+/* Leaflet Custom Marker Overrides */
+.custom-citizen-marker, .custom-bin-marker {
+  background: transparent !important;
+  border: none !important;
+}

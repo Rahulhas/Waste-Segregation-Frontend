@@ -1,12 +1,40 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
+import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
+import L from 'leaflet';
 
 const INITIAL_BINS = [
-  { id: 'BIN-204', zone: 'North Market', fill: 96, type: 'Mixed waste', eta: '08:20', status: 'Urgent', lat: 36, lon: 18 },
-  { id: 'BIN-118', zone: 'Lakeview Ward', fill: 91, type: 'Organic', eta: '08:35', status: 'Priority', lat: 52, lon: 42 },
-  { id: 'BIN-067', zone: 'Civic Centre', fill: 86, type: 'Recyclables', eta: '08:50', status: 'Priority', lat: 68, lon: 68 },
-  { id: 'BIN-311', zone: 'East Campus', fill: 83, type: 'Paper', eta: '09:10', status: 'Queued', lat: 82, lon: 84 },
+  { id: 'BIN-204', zone: 'North Market', fill: 96, type: 'Mixed waste', eta: '08:20', status: 'Urgent', lat: 19.095, lng: 72.865 },
+  { id: 'BIN-118', zone: 'Lakeview Ward', fill: 91, type: 'Organic', eta: '08:35', status: 'Priority', lat: 19.085, lng: 72.888 },
+  { id: 'BIN-067', zone: 'Civic Centre', fill: 86, type: 'Recyclables', eta: '08:50', status: 'Priority', lat: 19.076, lng: 72.877 },
+  { id: 'BIN-311', zone: 'East Campus', fill: 83, type: 'Paper', eta: '09:10', status: 'Queued', lat: 19.062, lng: 72.890 },
 ];
+
+const createBinIcon = (index, isSelected) => {
+  return L.divIcon({
+    html: `<div class="flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold shadow transition-all ${
+      isSelected 
+        ? 'border-white bg-sage-900 text-white ring-4 ring-sage-400/45' 
+        : 'border-sage-900 bg-white text-sage-900 hover:bg-sage-50'
+    }">
+      ${index + 1}
+    </div>`,
+    className: 'custom-bin-marker',
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+  });
+};
+
+function FitMapBounds({ bins }) {
+  const map = useMap();
+  useEffect(() => {
+    if (bins.length > 0) {
+      const bounds = bins.map(bin => [bin.lat, bin.lng]);
+      map.fitBounds(bounds, { padding: [40, 40] });
+    }
+  }, [bins, map]);
+  return null;
+}
 
 const AUDIT_ITEMS = [
   'Organic waste is separated',
@@ -114,14 +142,44 @@ export default function DispatchPage() {
                     <div><h2 className="font-semibold text-sage-900">Live collection route</h2><p className="mt-0.5 text-xs font-medium text-sage-800">Driver 04 · North district loop</p></div>
                     <span className="rounded-full bg-mint px-2 py-1 text-xs font-bold text-sage-900">On schedule</span>
                   </div>
-                  <div className="relative h-[330px] overflow-hidden rounded-lg border border-sage-300 bg-[#dcebdd]/75">
-                    <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'linear-gradient(#7da872 1px, transparent 1px), linear-gradient(90deg, #7da872 1px, transparent 1px)', backgroundSize: '38px 38px' }} />
-                    <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full" preserveAspectRatio="none" aria-label="Collection route map">
-                      <path d="M12 74 C22 61, 22 24, 36 18 S58 26, 52 43 S50 59, 68 68 S80 83, 88 76" fill="none" stroke="#145c43" strokeWidth="2.4" strokeDasharray="4 2" />
-                      <path d="M12 74 C22 61, 22 24, 36 18 S58 26, 52 43 S50 59, 68 68 S80 83, 88 76" fill="none" stroke="#d8f3dc" strokeWidth="0.9" />
-                    </svg>
-                    {bins.map((bin, index) => <button key={bin.id} type="button" onClick={() => setSelectedBinId(bin.id)} className={`absolute flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 text-xs font-bold shadow ${selectedBinId === bin.id ? 'border-white bg-sage-900 text-white ring-4 ring-sage-400/45' : 'border-sage-900 bg-white text-sage-900'}`} style={{ left: `${bin.lon}%`, top: `${bin.lat}%` }} aria-label={`Select ${bin.id}`}>{index + 1}</button>)}
-                    <div className="absolute bottom-3 left-3 rounded-md border border-white/70 bg-white/80 px-2.5 py-1.5 text-xs font-semibold text-sage-900 backdrop-blur-sm">6.4 km · 28 min estimated</div>
+                  <div className="relative h-[330px] overflow-hidden rounded-lg border border-sage-300">
+                    <MapContainer
+                      center={[19.076, 72.877]}
+                      zoom={13}
+                      className="absolute inset-0 h-full w-full"
+                      style={{ height: '330px', width: '100%', zIndex: 1 }}
+                    >
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <FitMapBounds bins={bins} />
+                      {bins.length > 1 && (
+                        <>
+                          <Polyline
+                            positions={bins.map((b) => [b.lat, b.lng])}
+                            pathOptions={{ color: '#145c43', weight: 4.8, dashArray: '4, 8' }}
+                          />
+                          <Polyline
+                            positions={bins.map((b) => [b.lat, b.lng])}
+                            pathOptions={{ color: '#d8f3dc', weight: 1.8 }}
+                          />
+                        </>
+                      )}
+                      {bins.map((bin, index) => (
+                        <Marker
+                          key={bin.id}
+                          position={[bin.lat, bin.lng]}
+                          icon={createBinIcon(index, selectedBinId === bin.id)}
+                          eventHandlers={{
+                            click: () => setSelectedBinId(bin.id),
+                          }}
+                        />
+                      ))}
+                    </MapContainer>
+                    <div className="absolute bottom-3 left-3 z-[1000] rounded-md border border-white/70 bg-white/80 px-2.5 py-1.5 text-xs font-semibold text-sage-900 backdrop-blur-sm shadow">
+                      {bins.length} stops remaining
+                    </div>
                   </div>
                   {selectedBin ? (
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-sage-200 bg-white/55 p-3">
