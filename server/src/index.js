@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth.js';
 import citizenRequestRoutes from './routes/citizenRequests.js';
+import routingRoutes from './routes/routing.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -29,6 +30,7 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/citizen-requests', citizenRequestRoutes);
+app.use('/api/routes', routingRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err);

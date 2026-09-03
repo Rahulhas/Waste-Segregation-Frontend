@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
+import RoadRouteMap from '../components/RoadRouteMap';
 
 const ZONES = [
   { id: 'north', name: 'North Market', shortName: 'North', fill: 94, collections: 38, contamination: 7, color: '#b83c2d' },
@@ -15,6 +16,13 @@ const RANGE_DATA = {
   '30 days': { collections: '724', trend: [92, 108, 116, 132, 144, 158, 174], labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7'], change: '+16.8%' },
   '90 days': { collections: '2,146', trend: [288, 316, 352, 389, 421, 468, 512], labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'], change: '+28.5%' },
 };
+
+const COLLECTION_ROUTE_STOPS = [
+  { id: 'north', lat: 19.076, lng: 72.877 },
+  { id: 'lake', lat: 19.089, lng: 72.865 },
+  { id: 'civic', lat: 19.062, lng: 72.881 },
+  { id: 'east', lat: 19.071, lng: 72.897 },
+];
 
 export default function AdminPage() {
   const [range, setRange] = useState('7 days');
@@ -44,6 +52,10 @@ export default function AdminPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-12">
+        <section className="rounded-xl border border-sage-300/80 bg-white/60 p-4 shadow-sm backdrop-blur-sm lg:col-span-12">
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-semibold text-sage-900">Live collection route</h2><p className="mt-0.5 text-xs font-medium text-sage-800">Road-snapped route through active collection zones</p></div><span className="rounded-full bg-mint px-2 py-1 text-xs font-bold text-sage-900">Current queue order</span></div>
+          <RoadRouteMap stops={COLLECTION_ROUTE_STOPS} height="360px" />
+        </section>
         <section className="rounded-xl border border-sage-300/80 bg-white/60 p-4 shadow-sm backdrop-blur-sm lg:col-span-8">
           <div className="mb-4 flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-semibold text-sage-900">Zone fill heatmap</h2><p className="mt-0.5 text-xs font-medium text-sage-800">Live capacity by collection zone</p></div><div className="flex items-center gap-2 text-[11px] font-semibold text-sage-800"><span className="h-3 w-3 rounded-sm bg-[#70a96e]" /> Healthy <span className="h-3 w-3 rounded-sm bg-[#e8c958]" /> Watch <span className="h-3 w-3 rounded-sm bg-[#b83c2d]" /> Critical</div></div>
           <div className="grid min-h-[330px] grid-cols-2 gap-2 rounded-lg border border-sage-300 bg-[#dcebdd]/70 p-3 sm:grid-cols-3">

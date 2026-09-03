@@ -76,4 +76,7 @@ export const api = {
 
   updateCitizenRequestStatus: (ticketId, payload) =>
     request(`/citizen-requests/${ticketId}/status`, { method: 'PATCH', body: JSON.stringify(payload) }),
+
+  roadRoute: (stops) =>
+    request('/routes/road', { method: 'POST', body: JSON.stringify({ stops }) }),
 };

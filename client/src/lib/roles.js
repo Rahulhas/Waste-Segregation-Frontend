@@ -2,7 +2,7 @@ const ROLE_ROUTES = {
   USER: '/citizen',
   DRIVER: '/dispatch',
   ADMIN: '/admin',
-  OPERATOR: '/alerts',
+  
 };
 
 export function getDefaultRoute(role) {
@@ -14,7 +14,7 @@ export function getRoleLabel(role) {
     USER: 'User',
     DRIVER: 'Driver & Collector',
     ADMIN: 'Municipal Admin',
-    OPERATOR: 'System Operator',
+    
   };
   return labels[role] || role;
 }
